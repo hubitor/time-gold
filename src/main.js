@@ -9,6 +9,8 @@ import '@/assets/css/app.css';
 import '@/assets/js/amazeui.datatables.min.js';
 import '@/assets/js/dataTables.responsive.min.js';
 
+import 'fullcalendar';
+
 Vue.config.productionTip = false;
 
 const bus = new Vue();

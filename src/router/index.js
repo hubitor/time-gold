@@ -8,6 +8,11 @@ export default new Router({
   routes: [
     {
       path: '/',
+      name: 'calendar',
+      component: _import('calendar/calendar')
+    },
+    {
+      path: '/time',
       name: 'time',
       component: _import('time/time')
     }

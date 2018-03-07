@@ -12,7 +12,7 @@
                         </div>
                     </div>
                     <div class="widget-body  widget-body-lg am-fr">
-                        <table id="example-r" width="100%" class="am-table am-table-bordered am-table-radius am-table-striped am-table-compact tpl-table-black am-text-nowrap">
+                        <table id="example" width="100%" class="am-table am-table-bordered am-table-radius am-table-striped am-table-compact tpl-table-black am-text-nowrap">
                             <thead>
                                 <tr>
                                     <th></th>
@@ -36,6 +36,7 @@
 <script>
 import Header from '@/components/header';
 import Sidebar from '@/components/sidebar';
+
 export default {
     name: 'Time',
     components: {
@@ -112,7 +113,7 @@ export default {
         this.init();
     },
     mounted() {
-        $('#example-r').DataTable({
+        $('#example').DataTable({
             bInfo: false, //页脚信息
             dom: 'ti',
             responsive: true,
