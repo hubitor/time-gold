@@ -9,13 +9,28 @@
                 </div>
             </div>
         </div>
+        <am-modal :is-show.sync="promptVisbile" :width="320">
+            <am-modal-header>123</am-modal-header>
+            <am-modal-body>
+                <am-radio-group v-model="event.backgroundColor">
+                    <am-radio label="red"></am-radio>
+                    <am-radio label="#FAEBD7"></am-radio>
+                    <am-radio label="#FFF8DC"></am-radio>
+                    <am-radio label="#FF7F50"></am-radio>
+                </am-radio-group>
+                <am-input v-model="event.title"></am-input>
+            </am-modal-body>
+            <am-modal-footer>
+                <span class="am-modal-btn" @click="cancel(event)">取消</span>
+                <span class="am-modal-btn" @click="sucess(event)">确定</span>
+            </am-modal-footer>
+        </am-modal>
     </div>
 </template>
 
 <script>
 import Header from '@/components/header';
 import Sidebar from '@/components/sidebar';
-
 export default {
     name: 'Calendar',
     components: {
@@ -24,10 +39,39 @@ export default {
     },
     data() {
         return {
+            promptVisbile: false,
             active: false,
             time: '24:00:00',
             startTime: 0,
             endTime: 0,
+            title: '',
+            event: {
+                title: '',
+                backgroundColor: ''
+            },
+            newEvents: [],
+            events: [{
+                title: 'hello',
+                start: '2018-03-08T17:30:00',
+                end: '2018-03-08T18:00:00',
+                editable: true
+            },
+            {
+                title: '工作',
+                start: '2018-03-08T09:30:00',
+                end: '2018-03-08T12:00:00',
+            },
+            {
+                title: '吃饭',
+                start: '2018-03-08T12:00:00',
+                end: '2018-03-08T12:30:00',
+            },
+            {
+                title: '休息',
+                start: '2018-03-08T12:30:00',
+                end: '2018-03-08T13:30:00',
+            }
+            ]
         };
     },
     created() {},
@@ -69,7 +113,6 @@ export default {
                     selectLongPressDelay: 500
                 }
             },
-
             selectOverlap: false,
             select: function(start, end) {
                 // var title = prompt('填写你的记录的:');
@@ -83,11 +126,24 @@ export default {
                 //     $('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
                 // }
                 // $('#calendar').fullCalendar('unselect');
-            },
 
+                let e = {
+                    id: 123,
+                    start: start.format(),
+                    end: end.format(),
+                    title: ''
+                }
+                $('#calendar').fullCalendar('renderEvent', e, true);
+                that.event = e;
+                that.promptVisbile = true;
+            },
+            // eventClick: function(event, jsEvent, view) {
+            //     //  弹出框
+            //     $('#calendar-edit-box').modal();
+            // },
             editable: true,
             eventOverlap: false,
-            eventDragStart: function(event) {
+            eventDragStart: function(event, jsEvent, ui, view) {
                 that.startTime = event.start.unix();
                 that.endTime = event.end.unix();
             },
@@ -101,42 +157,24 @@ export default {
                     revertFunc();
                     $('#calendar').fullCalendar('renderEvent', event, true);
                 }
-
-                let events = $('#calendar').fullCalendar('getEventSources');
-                console.log(events);
+                // let events = $('#calendar').fullCalendar('getEventSources');
+                console.log(event);
             },
-
+            // eventAllow: function(dropInfo, draggedEvent) {
+            //     console.log(dropInfo);
+            //     console.log(draggedEvent);
+            // },
+            // eventRender: function(event, element) {
+            //     console.log(event);
+            //     console.log(element);
+            // },
             displayEventTime: true,
             displayEventEnd: true,
             eventLimit: 3,
-            events: [
-                {
-                    title: 'hello',
-                    start: '2018-03-08T17:30:00',
-                    end: '2018-03-08T18:00:00',
-                    editable: true
-                },
-                {
-                    title: '工作',
-                    start: '2018-03-08T09:30:00',
-                    end: '2018-03-08T12:00:00',
-                },
-                {
-                    title: '吃饭',
-                    start: '2018-03-08T12:00:00',
-                    end: '2018-03-08T12:30:00',
-                },
-                {
-                    title: '休息',
-                    start: '2018-03-08T12:30:00',
-                    end: '2018-03-08T13:30:00',
-                }
-            ],
-
+            events: that.events,
             windowResize: function(view) {
                 console.log(view);
             }
-
             // navLinks: true, // can click day/week names to navigate views
             // selectable: true,
             // selectHelper: true,
@@ -145,6 +183,29 @@ export default {
     methods: {
         isBespread(bool) {
             this.active = bool;
+        },
+        showPrompt() {
+            this.promptVisbile = true;
+        },
+        submitHandle(msg) {
+            this.$notify({
+                message: '您输入了' + msg
+            });
+        },
+        cancelHandle() {
+            this.$notify({
+                message: '您点击了取消'
+            });
+        },
+        sucess(event) {
+            this.newEvents.push(event);
+            $('#calendar').fullCalendar('removeEvents', event.id);
+            $('#calendar').fullCalendar('renderEvents', this.newEvents, true);
+            this.promptVisbile = false;
+        },
+        cancel(event) {
+            $('#calendar').fullCalendar('removeEvents', event.id);
+            this.promptVisbile = false;
         }
     }
 };

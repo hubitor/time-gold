@@ -10,6 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "amaze-vue": "^1.1.11",
     "datatables.net": "^1.10.16",
     "datatables.net-editor-server": "^1.7.0",
     "eslint-plugin-vue": "^4.3.0",
