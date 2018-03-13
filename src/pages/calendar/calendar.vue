@@ -9,19 +9,17 @@
                 </div>
             </div>
         </div>
-        <am-modal :is-show.sync="promptVisbile" :width="320">
-            <am-modal-header>123</am-modal-header>
+        <am-modal :is-show.sync="promptVisbile" :width="width" :close-via-dimmer=false @visible-change="visibleChange">
+            <am-modal-header :closeable="eventClick">你都做了什么？</am-modal-header>
             <am-modal-body>
                 <am-radio-group v-model="event.backgroundColor">
-                    <am-radio label="red"></am-radio>
-                    <am-radio label="#FAEBD7"></am-radio>
-                    <am-radio label="#FFF8DC"></am-radio>
-                    <am-radio label="#FF7F50"></am-radio>
+                    <am-radio style="margin-right: 5px;padding-left: 20px;" :inline=false v-for="(state, index) in states" :key="state.color" :label="state.color"><am-icon type="bell" :style="{color: state.color}"></am-icon> {{state.text}} </am-radio>
                 </am-radio-group>
                 <am-input v-model="event.title"></am-input>
             </am-modal-body>
             <am-modal-footer>
-                <span class="am-modal-btn" @click="cancel(event)">取消</span>
+                <span v-if="eventClick" class="am-modal-btn" @click="remove(event)" style="color: red">删除</span>
+                <span v-else class="am-modal-btn" @click="cancel(event)">取消</span>
                 <span class="am-modal-btn" @click="sucess(event)">确定</span>
             </am-modal-footer>
         </am-modal>
@@ -39,6 +37,7 @@ export default {
     },
     data() {
         return {
+            eventClick: false,
             promptVisbile: false,
             active: false,
             time: '24:00:00',
@@ -71,10 +70,32 @@ export default {
                 start: '2018-03-08T12:30:00',
                 end: '2018-03-08T13:30:00',
             }
-            ]
+            ],
+            states: [{
+                color: '#FF2D2D',
+                text: '浪费'
+            },{
+                color: '#FF9224',
+                text: '强迫'
+            },{
+                color: '#9D9D9D',
+                text: '低效'
+            },{
+                color: '#E1E100',
+                text: '高效'
+            },{
+                color: '#2894FF',
+                text: '娱乐'
+            },{
+                color: '#64A600',
+                text: '休闲'
+            },],
+            width: 420
         };
     },
-    created() {},
+    created() {
+        this.init();
+    },
     mounted() {
         let that = this;
         $('#calendar').fullCalendar({
@@ -115,32 +136,21 @@ export default {
             },
             selectOverlap: false,
             select: function(start, end) {
-                // var title = prompt('填写你的记录的:');
-                // var eventData;
-                // if (title) {
-                //     eventData = {
-                //         title: title,
-                //         start: start,
-                //         end: end
-                //     };
-                //     $('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
-                // }
-                // $('#calendar').fullCalendar('unselect');
-
                 let e = {
-                    id: 123,
+                    id: new Date().getTime(),
                     start: start.format(),
                     end: end.format(),
                     title: ''
-                }
+                };
                 $('#calendar').fullCalendar('renderEvent', e, true);
                 that.event = e;
                 that.promptVisbile = true;
             },
-            // eventClick: function(event, jsEvent, view) {
-            //     //  弹出框
-            //     $('#calendar-edit-box').modal();
-            // },
+            eventClick: function(event, jsEvent, view) {
+                that.eventClick = true;
+                that.event = event;
+                that.promptVisbile = true;
+            },
             editable: true,
             eventOverlap: false,
             eventDragStart: function(event, jsEvent, ui, view) {
@@ -155,7 +165,14 @@ export default {
                     that.endTime = event.end.unix();
                 } else {
                     revertFunc();
-                    $('#calendar').fullCalendar('renderEvent', event, true);
+                    let e = {
+                        id: new Date().getTime(),
+                        start: event.start.format(),
+                        end: event.end.format(),
+                        title: event.title,
+                        backgroundColor: event.backgroundColor
+                    };
+                    $('#calendar').fullCalendar('renderEvent', e, true);
                 }
                 // let events = $('#calendar').fullCalendar('getEventSources');
                 console.log(event);
@@ -172,15 +189,20 @@ export default {
             displayEventEnd: true,
             eventLimit: 3,
             events: that.events,
+            eventTextColor: '#000000',
+            eventBorderColor: '#8E8E8E',
             windowResize: function(view) {
                 console.log(view);
             }
-            // navLinks: true, // can click day/week names to navigate views
-            // selectable: true,
-            // selectHelper: true,
         });
     },
     methods: {
+        init () {
+            let screenWidth = document.body.clientWidth;
+            this.width = screenWidth > 512 ? 420 : 230;
+
+            this.event.backgroundColor = this.states[0];
+        },
         isBespread(bool) {
             this.active = bool;
         },
@@ -198,14 +220,21 @@ export default {
             });
         },
         sucess(event) {
-            this.newEvents.push(event);
+            //this.newEvents.push(event);
             $('#calendar').fullCalendar('removeEvents', event.id);
-            $('#calendar').fullCalendar('renderEvents', this.newEvents, true);
+            $('#calendar').fullCalendar('renderEvent', event, true);
             this.promptVisbile = false;
         },
         cancel(event) {
             $('#calendar').fullCalendar('removeEvents', event.id);
             this.promptVisbile = false;
+        },
+        remove(event) {
+            $('#calendar').fullCalendar('removeEvents', event.id);
+            this.promptVisbile = false;
+        },
+        visibleChange(isShow) {
+            if (!isShow && this.eventClick) this.eventClick = false;
         }
     }
 };

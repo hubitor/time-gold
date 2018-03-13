@@ -43,9 +43,10 @@ export default {
         };
     },
     created() {
+        this.autoLeftNav();
         global.bus.$on('is-show', () => {
             this.active = !this.active;
-                
+
             if (this.screenWidth > 1024) {
                 this.$emit('is-bespread', this.active);
             }
