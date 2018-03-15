@@ -29,6 +29,7 @@
 <script>
 import Header from '@/components/header';
 import Sidebar from '@/components/sidebar';
+import uuid from '@/assets/utils/uuid';
 export default {
     name: 'Calendar',
     components: {
@@ -43,53 +44,62 @@ export default {
             time: '24:00:00',
             startTime: 0,
             endTime: 0,
+            dropId: '',
             title: '',
             event: {
                 title: '',
                 backgroundColor: ''
             },
             newEvents: [],
-            events: [{
-                title: 'hello',
-                start: '2018-03-08T17:30:00',
-                end: '2018-03-08T18:00:00',
-                editable: true
-            },
-            {
-                title: '工作',
-                start: '2018-03-08T09:30:00',
-                end: '2018-03-08T12:00:00',
-            },
-            {
-                title: '吃饭',
-                start: '2018-03-08T12:00:00',
-                end: '2018-03-08T12:30:00',
-            },
-            {
-                title: '休息',
-                start: '2018-03-08T12:30:00',
-                end: '2018-03-08T13:30:00',
-            }
+            events: [
+                {
+                    title: 'hello',
+                    start: '2018-03-08T17:30:00',
+                    end: '2018-03-08T18:00:00'
+                },
+                {
+                    title: '工作',
+                    start: '2018-03-15T09:30:00',
+                    end: '2018-03-15T12:00:00',
+                    backgroundColor: '#E1E100'
+                },
+                {
+                    title: '吃饭',
+                    start: '2018-03-08T12:00:00',
+                    end: '2018-03-08T12:30:00'
+                },
+                {
+                    title: '休息',
+                    start: '2018-03-08T12:30:00',
+                    end: '2018-03-08T13:30:00'
+                }
             ],
-            states: [{
-                color: '#FF2D2D',
-                text: '浪费'
-            },{
-                color: '#FF9224',
-                text: '强迫'
-            },{
-                color: '#9D9D9D',
-                text: '低效'
-            },{
-                color: '#E1E100',
-                text: '高效'
-            },{
-                color: '#2894FF',
-                text: '娱乐'
-            },{
-                color: '#64A600',
-                text: '休闲'
-            },],
+            states: [
+                {
+                    color: '#FF2D2D',
+                    text: '浪费'
+                },
+                {
+                    color: '#FF9224',
+                    text: '强迫'
+                },
+                {
+                    color: '#9D9D9D',
+                    text: '低效'
+                },
+                {
+                    color: '#E1E100',
+                    text: '高效'
+                },
+                {
+                    color: '#2894FF',
+                    text: '娱乐'
+                },
+                {
+                    color: '#64A600',
+                    text: '休闲'
+                }
+            ],
             width: 420
         };
     },
@@ -132,12 +142,16 @@ export default {
                     selectable: true,
                     selectHelper: true,
                     selectLongPressDelay: 500
+                },
+                month: {
+                    editable: false
                 }
             },
             selectOverlap: false,
+            editable: true,
             select: function(start, end) {
                 let e = {
-                    id: new Date().getTime(),
+                    _id: uuid(),
                     start: start.format(),
                     end: end.format(),
                     title: ''
@@ -147,35 +161,51 @@ export default {
                 that.promptVisbile = true;
             },
             eventClick: function(event, jsEvent, view) {
+                if (view.name === 'month') return;
                 that.eventClick = true;
-                that.event = event;
+                that.event = {
+                    _id: event._id,
+                    start: event.start.format(),
+                    end: event.end.format(),
+                    title: event.title,
+                    backgroundColor: event.backgroundColor
+                };
                 that.promptVisbile = true;
             },
-            editable: true,
             eventOverlap: false,
             eventDragStart: function(event, jsEvent, ui, view) {
                 that.startTime = event.start.unix();
                 that.endTime = event.end.unix();
+                that.dropId = event._id;
             },
             eventDrop: function(event, delta, revertFunc) {
                 let start = event.start.unix();
                 let end = event.end.unix();
                 if ((start > that.startTime && start < that.endTime) || (end > that.startTime && end < that.endTime)) {
-                    that.startTime = event.start.unix();
-                    that.endTime = event.end.unix();
+                    let e = {
+                        _id: that.dropId,
+                        start: event.start.format(),
+                        end: event.end.format(),
+                    };
+                    that.operate(true, e, false, revertFunc);
                 } else {
                     revertFunc();
                     let e = {
-                        id: new Date().getTime(),
+                        _id: uuid(),
                         start: event.start.format(),
                         end: event.end.format(),
                         title: event.title,
                         backgroundColor: event.backgroundColor
                     };
-                    $('#calendar').fullCalendar('renderEvent', e, true);
+                    that.operate(false, e, true);
                 }
-                // let events = $('#calendar').fullCalendar('getEventSources');
-                console.log(event);
+            },
+            eventResize: function(event, delta, revertFunc) {
+                let e = {
+                    _id: event._id,
+                    end: event.end.format(),
+                };
+                that.operate(true, e, true, revertFunc);
             },
             // eventAllow: function(dropInfo, draggedEvent) {
             //     console.log(dropInfo);
@@ -188,16 +218,20 @@ export default {
             displayEventTime: true,
             displayEventEnd: true,
             eventLimit: 3,
-            events: that.events,
+            // events: that.events,
+            events: {
+                url: 'http://127.0.0.1:7001/time/list',
+                type: 'GET'
+            },
             eventTextColor: '#000000',
-            eventBorderColor: '#8E8E8E',
-            windowResize: function(view) {
-                console.log(view);
-            }
+            eventBorderColor: '#8E8E8E'
+            // windowResize: function(view) {
+            //     console.log(view);
+            // }
         });
     },
     methods: {
-        init () {
+        init() {
             let screenWidth = document.body.clientWidth;
             this.width = screenWidth > 512 ? 420 : 230;
 
@@ -209,32 +243,59 @@ export default {
         showPrompt() {
             this.promptVisbile = true;
         },
-        submitHandle(msg) {
-            this.$notify({
-                message: '您输入了' + msg
-            });
-        },
-        cancelHandle() {
-            this.$notify({
-                message: '您点击了取消'
-            });
-        },
         sucess(event) {
-            //this.newEvents.push(event);
-            $('#calendar').fullCalendar('removeEvents', event.id);
-            $('#calendar').fullCalendar('renderEvent', event, true);
+            $('#calendar').fullCalendar('removeEvents', event._id);
+
+            this.operate(this.eventClick, event, true);
+
             this.promptVisbile = false;
         },
         cancel(event) {
-            $('#calendar').fullCalendar('removeEvents', event.id);
+            $('#calendar').fullCalendar('removeEvents', event._id);
             this.promptVisbile = false;
         },
         remove(event) {
-            $('#calendar').fullCalendar('removeEvents', event.id);
+            this.$http
+                .post(`time/remove/${event._id}`)
+                .then(message => {
+                    $('#calendar').fullCalendar('removeEvents', event._id);
+                    this.$notify({
+                        message,
+                        type: 'success'
+                    });
+                })
+                .catch(() => {
+                    this.$notify({
+                        message: '信息删除失败！',
+                        type: 'error'
+                    });
+                });
             this.promptVisbile = false;
         },
         visibleChange(isShow) {
             if (!isShow && this.eventClick) this.eventClick = false;
+        },
+        operate(eventClick, event, refresh, cb) {
+            let url = 'time/create';
+            if (eventClick) url = `time/modify/${event._id}`;
+
+            this.$http
+                .post(url, event)
+                .then(message => {
+                    console.log(message);
+                    if (refresh) $('#calendar').fullCalendar('renderEvent', event, true);
+                    this.$notify({
+                        message,
+                        type: 'success'
+                    });
+                })
+                .catch(() => {
+                    if (cb) cb();
+                    this.$notify({
+                        message: `${this.eventClick ? '信息修改失败！' : '信息录入失败！'}`,
+                        type: 'error'
+                    });
+                });
         }
     }
 };

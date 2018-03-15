@@ -12,6 +12,9 @@ import '@/assets/css/app.css';
 import AmazeVue from 'amaze-vue';
 Vue.use(AmazeVue);
 
+import $http from '@/assets/utils/httpInterceptor';
+Vue.prototype.$http= $http;
+
 import 'fullcalendar';
 
 Vue.config.productionTip = false;
