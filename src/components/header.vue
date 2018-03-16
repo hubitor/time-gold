@@ -33,14 +33,14 @@
 </template>
 
 <script>
-    export default {
-        name: 'Header',
-        methods: {
-            click() {
-                global.bus.$emit('is-show')
-            }
+export default {
+    name: 'Header',
+    methods: {
+        click() {
+            global.bus.$emit('is-show');
         }
-    };
+    }
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

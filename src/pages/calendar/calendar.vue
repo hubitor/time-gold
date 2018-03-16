@@ -1,21 +1,24 @@
 <template>
     <div>
-        <Header></Header>
-        <Sidebar @is-bespread="isBespread"></Sidebar>
-        <div class="tpl-content-wrapper" :class="{active}">
-            <div class="row-content am-cf">
-                <div class="tpl-calendar-box">
-                    <div id="calendar"></div>
-                </div>
+        <div class="row-content am-cf">
+            <div class="tpl-calendar-box">
+                <div id="calendar"></div>
             </div>
         </div>
         <am-modal :is-show.sync="promptVisbile" :width="width" :close-via-dimmer=false @visible-change="visibleChange">
             <am-modal-header :closeable="eventClick">你都做了什么？</am-modal-header>
             <am-modal-body>
                 <am-radio-group v-model="event.backgroundColor">
-                    <am-radio style="margin-right: 5px;padding-left: 20px;" :inline=false v-for="(state, index) in states" :key="state.color" :label="state.color"><am-icon type="bell" :style="{color: state.color}"></am-icon> {{state.text}} </am-radio>
+                    <am-radio style="margin-right: 5px;padding-left: 20px;" :inline=false v-for="(state, index) in states" :key="state.color" :label="state.color">
+                        <am-icon type="square" :style="{color: state.color}"></am-icon> {{state.text}} </am-radio>
+                    <!-- <am-radio style="margin-right: 5px;padding-left: 20px;" :inline=false v-for="(state, index) in states" :key="state.color" :label="state.color">
+                                    <am-animation type="spin">
+                                        <am-icon type="square" :style="{color: state.color}"></am-icon>
+                                    </am-animation>
+                                    {{state.text}}
+                                </am-radio> -->
                 </am-radio-group>
-                <am-input v-model="event.title"></am-input>
+                <am-input v-model="event.title" v-focus></am-input>
             </am-modal-body>
             <am-modal-footer>
                 <span v-if="eventClick" class="am-modal-btn" @click="remove(event)" style="color: red">删除</span>
@@ -27,20 +30,21 @@
 </template>
 
 <script>
-import Header from '@/components/header';
-import Sidebar from '@/components/sidebar';
 import uuid from '@/assets/utils/uuid';
 export default {
     name: 'Calendar',
-    components: {
-        Header,
-        Sidebar
+    directives: {
+        focus: {
+            // 指令的定义
+            inserted: function(el) {
+                el.focus();
+            }
+        }
     },
     data() {
         return {
             eventClick: false,
             promptVisbile: false,
-            active: false,
             time: '24:00:00',
             startTime: 0,
             endTime: 0,
@@ -51,54 +55,52 @@ export default {
                 backgroundColor: ''
             },
             newEvents: [],
-            events: [
-                {
-                    title: 'hello',
-                    start: '2018-03-08T17:30:00',
-                    end: '2018-03-08T18:00:00'
-                },
-                {
-                    title: '工作',
-                    start: '2018-03-15T09:30:00',
-                    end: '2018-03-15T12:00:00',
-                    backgroundColor: '#E1E100'
-                },
-                {
-                    title: '吃饭',
-                    start: '2018-03-08T12:00:00',
-                    end: '2018-03-08T12:30:00'
-                },
-                {
-                    title: '休息',
-                    start: '2018-03-08T12:30:00',
-                    end: '2018-03-08T13:30:00'
-                }
+            events: [{
+                title: 'hello',
+                start: '2018-03-08T17:30:00',
+                end: '2018-03-08T18:00:00'
+            },
+            {
+                title: '工作',
+                start: '2018-03-15T09:30:00',
+                end: '2018-03-15T12:00:00',
+                backgroundColor: '#E1E100'
+            },
+            {
+                title: '吃饭',
+                start: '2018-03-08T12:00:00',
+                end: '2018-03-08T12:30:00'
+            },
+            {
+                title: '休息',
+                start: '2018-03-08T12:30:00',
+                end: '2018-03-08T13:30:00'
+            }
             ],
-            states: [
-                {
-                    color: '#FF2D2D',
-                    text: '浪费'
-                },
-                {
-                    color: '#FF9224',
-                    text: '强迫'
-                },
-                {
-                    color: '#9D9D9D',
-                    text: '低效'
-                },
-                {
-                    color: '#E1E100',
-                    text: '高效'
-                },
-                {
-                    color: '#2894FF',
-                    text: '娱乐'
-                },
-                {
-                    color: '#64A600',
-                    text: '休闲'
-                }
+            states: [{
+                color: '#FF2D2D',
+                text: '浪费'
+            },
+            {
+                color: '#FF9224',
+                text: '强迫'
+            },
+            {
+                color: '#9D9D9D',
+                text: '低效'
+            },
+            {
+                color: '#E1E100',
+                text: '高效'
+            },
+            {
+                color: '#2894FF',
+                text: '娱乐'
+            },
+            {
+                color: '#64A600',
+                text: '休闲'
+            }
             ],
             width: 420
         };
@@ -157,6 +159,7 @@ export default {
                     title: ''
                 };
                 $('#calendar').fullCalendar('renderEvent', e, true);
+                e.backgroundColor = that.states[0].color;
                 that.event = e;
                 that.promptVisbile = true;
             },
@@ -185,7 +188,7 @@ export default {
                     let e = {
                         _id: that.dropId,
                         start: event.start.format(),
-                        end: event.end.format(),
+                        end: event.end.format()
                     };
                     that.operate(true, e, false, revertFunc);
                 } else {
@@ -203,9 +206,10 @@ export default {
             eventResize: function(event, delta, revertFunc) {
                 let e = {
                     _id: event._id,
-                    end: event.end.format(),
+                    start: event.start.format(),
+                    end: event.end.format()
                 };
-                that.operate(true, e, true, revertFunc);
+                that.operate(true, e, false, revertFunc);
             },
             // eventAllow: function(dropInfo, draggedEvent) {
             //     console.log(dropInfo);
@@ -234,20 +238,13 @@ export default {
         init() {
             let screenWidth = document.body.clientWidth;
             this.width = screenWidth > 512 ? 420 : 230;
-
-            this.event.backgroundColor = this.states[0];
-        },
-        isBespread(bool) {
-            this.active = bool;
         },
         showPrompt() {
             this.promptVisbile = true;
         },
         sucess(event) {
             $('#calendar').fullCalendar('removeEvents', event._id);
-
             this.operate(this.eventClick, event, true);
-
             this.promptVisbile = false;
         },
         cancel(event) {
@@ -278,7 +275,6 @@ export default {
         operate(eventClick, event, refresh, cb) {
             let url = 'time/create';
             if (eventClick) url = `time/modify/${event._id}`;
-
             this.$http
                 .post(url, event)
                 .then(message => {
