@@ -18,6 +18,16 @@ export default new Router({
         name: 'time',
         component: _import('time/time'),
       }]
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: _import('login'),
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: _import('register'),
     }
   ]
 });
