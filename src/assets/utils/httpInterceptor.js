@@ -10,7 +10,7 @@ import CookieUtil from './cookie';
  * 5、封装get,post数据请求方法
  */
 //全局默认值
-let serverHost = 'http://127.0.0.1:7001';
+let serverHost = 'http://39.106.220.86:7001';
 axios.defaults.baseURL = serverHost;
 //拦截器
 // 添加请求拦截器

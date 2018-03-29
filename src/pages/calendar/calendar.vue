@@ -5,7 +5,7 @@
                 <div id="calendar"></div>
             </div>
         </div>
-        <am-modal :is-show.sync="promptVisbile" :width="width" :close-via-dimmer=false @visible-change="visibleChange">
+        <am-modal :is-show.sync="promptVisbile" :width="width" :close-via-dimmer=false @visible-change="visibleChange" class="modal" :style="{'height': (clientY) + 'px'}">
             <am-modal-header :closeable="eventClick">你都做了什么？</am-modal-header>
             <am-modal-body>
                 <am-radio-group v-model="event.backgroundColor">
@@ -18,7 +18,7 @@
                                     {{state.text}}
                                 </am-radio> -->
                 </am-radio-group>
-                <am-input v-model="event.title" v-focus></am-input>
+                <am-input v-model="event.title" v-focus="!_isMobile()"></am-input>
             </am-modal-body>
             <am-modal-footer>
                 <span v-if="eventClick" class="am-modal-btn" @click="remove(event)" style="color: red">删除</span>
@@ -36,13 +36,14 @@ export default {
     directives: {
         focus: {
             // 指令的定义
-            inserted: function(el) {
-                el.focus();
+            inserted: function(el, binding) {
+                if (binding.value) el.focus();
             }
         }
     },
     data() {
         return {
+            clientY: 0,
             eventClick: false,
             promptVisbile: false,
             time: '24:00:00',
@@ -55,52 +56,54 @@ export default {
                 backgroundColor: ''
             },
             newEvents: [],
-            events: [{
-                title: 'hello',
-                start: '2018-03-08T17:30:00',
-                end: '2018-03-08T18:00:00'
-            },
-            {
-                title: '工作',
-                start: '2018-03-15T09:30:00',
-                end: '2018-03-15T12:00:00',
-                backgroundColor: '#E1E100'
-            },
-            {
-                title: '吃饭',
-                start: '2018-03-08T12:00:00',
-                end: '2018-03-08T12:30:00'
-            },
-            {
-                title: '休息',
-                start: '2018-03-08T12:30:00',
-                end: '2018-03-08T13:30:00'
-            }
+            events: [
+                {
+                    title: 'hello',
+                    start: '2018-03-08T17:30:00',
+                    end: '2018-03-08T18:00:00'
+                },
+                {
+                    title: '工作',
+                    start: '2018-03-15T09:30:00',
+                    end: '2018-03-15T12:00:00',
+                    backgroundColor: '#E1E100'
+                },
+                {
+                    title: '吃饭',
+                    start: '2018-03-08T12:00:00',
+                    end: '2018-03-08T12:30:00'
+                },
+                {
+                    title: '休息',
+                    start: '2018-03-08T12:30:00',
+                    end: '2018-03-08T13:30:00'
+                }
             ],
-            states: [{
-                color: '#FF2D2D',
-                text: '浪费'
-            },
-            {
-                color: '#FF9224',
-                text: '强迫'
-            },
-            {
-                color: '#9D9D9D',
-                text: '低效'
-            },
-            {
-                color: '#E1E100',
-                text: '高效'
-            },
-            {
-                color: '#2894FF',
-                text: '娱乐'
-            },
-            {
-                color: '#64A600',
-                text: '休闲'
-            }
+            states: [
+                {
+                    color: '#FF2D2D',
+                    text: '浪费'
+                },
+                {
+                    color: '#FF9224',
+                    text: '强迫'
+                },
+                {
+                    color: '#9D9D9D',
+                    text: '低效'
+                },
+                {
+                    color: '#E1E100',
+                    text: '高效'
+                },
+                {
+                    color: '#2894FF',
+                    text: '娱乐'
+                },
+                {
+                    color: '#64A600',
+                    text: '休闲'
+                }
             ],
             width: 420
         };
@@ -174,6 +177,7 @@ export default {
                     backgroundColor: event.backgroundColor
                 };
                 that.promptVisbile = true;
+                that.clientY = jsEvent.clientY;
             },
             eventOverlap: false,
             eventDragStart: function(event, jsEvent, ui, view) {
@@ -224,7 +228,7 @@ export default {
             eventLimit: 3,
             // events: that.events,
             events: {
-                url: 'http://127.0.0.1:7001/time/list',
+                url: 'http://39.106.220.86:7001/time/list',
                 type: 'GET'
             },
             eventTextColor: '#000000',
@@ -292,6 +296,10 @@ export default {
                         type: 'error'
                     });
                 });
+        },
+        _isMobile() {
+            let flag = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);
+            return flag || false;
         }
     }
 };

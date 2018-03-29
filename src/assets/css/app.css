@@ -189,9 +189,7 @@ ul.tpl-dropdown-content .tpl-dropdown-menu-messages-item .menu-messages-content 
 .am-dimmer {
   z-index: 1200;
 }
-.am-modal {
-  z-index: 1300;
-}
+
 .am-datepicker-dropdown {
   z-index: 1400;
 }
@@ -1968,4 +1966,8 @@ ul.tpl-dropdown-content .tpl-dropdown-menu-messages-item .menu-messages-content 
 .fadeIn {
   -webkit-animation-name: fadeIn;
   animation-name: fadeIn;
+}
+
+.modal {
+  position: absolute;
 }
