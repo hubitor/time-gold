@@ -5,7 +5,7 @@
                 <div id="calendar"></div>
             </div>
         </div>
-        <am-modal :is-show.sync="promptVisbile" :width="width" :close-via-dimmer=false @visible-change="visibleChange" class="modal" :style="{'height': (clientY) + 'px'}">
+        <am-modal :is-show.sync="promptVisbile" :width="width" :close-via-dimmer=false @visible-change="visibleChange" class="modal" :style="{'margin-top': '-' + (clientY) + 'px'}">
             <am-modal-header :closeable="eventClick">你都做了什么？</am-modal-header>
             <am-modal-body>
                 <am-radio-group v-model="event.backgroundColor">
@@ -177,7 +177,7 @@ export default {
                     backgroundColor: event.backgroundColor
                 };
                 that.promptVisbile = true;
-                that.clientY = jsEvent.clientY;
+                that.clientY = jsEvent.screenY;
             },
             eventOverlap: false,
             eventDragStart: function(event, jsEvent, ui, view) {
